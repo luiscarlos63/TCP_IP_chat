@@ -3,3 +3,6 @@ server/.vscode/launch.json
 server/.vscode/tasks.json
 server/tcpserver
 client/tcpclient.elf
+client/.vscode/launch.json
+client/.vscode/tasks.json
+client/tcpclient
