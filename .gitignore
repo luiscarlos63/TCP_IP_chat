@@ -1,0 +1,5 @@
+server/tcpserver.elf
+server/.vscode/launch.json
+server/.vscode/tasks.json
+server/tcpserver
+client/tcpclient.elf

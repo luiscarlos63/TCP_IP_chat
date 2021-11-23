@@ -12,6 +12,8 @@
 #include <netdb.h>
 #include <stdlib.h>
 #include <string.h>
+#include <pthread.h>
+#include <ctype.h>
 
 void panic(char *msg);
 #define panic(m)	{perror(m); abort();}
