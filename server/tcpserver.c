@@ -45,7 +45,7 @@ void *threadfuntion(void *arg);
 void* th_sender_fun(void* arg);
 
 void insert_client(client_t cli);
-client_t remove_client(client_t cli);
+client_t remove_clients(client_t cli);
 
 void send_message_handler(char* buffer, client_t cli);
 void initialize(message_queue_t *q);
@@ -167,7 +167,7 @@ void *threadfuntion(void *arg)
 		}
 	}
 	
-	remove_client(cli);
+	remove_clients(cli);
 
 	printf("o cliente: %s saiu do chat", cli.name);
 	//send(cli.sd_id,buffer,sizeof(buffer),0);
@@ -176,7 +176,8 @@ void *threadfuntion(void *arg)
 	shutdown(cli.sd_id,SHUT_WR);
 	shutdown(cli.sd_id,SHUT_RDWR);
 	// 		                  /* close the client's channel */
-	return 0;                           /* terminate the thread */
+	pthread_exit(NULL);
+	//return 0;                           /* terminate the thread */
 }
 
 
