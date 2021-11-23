@@ -5,6 +5,7 @@
 #include <netdb.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 void panic(char *msg);
 #define panic(m)	{perror(m); abort();}
@@ -44,7 +45,7 @@ void *threadfuntion(void *arg);
 void* th_sender_fun(void* arg);
 
 void insert_client(client_t cli);
-client_t remove_client(client_t cli);
+client_t remove_clients(client_t cli);
 
 void send_message_handler(char* buffer, client_t cli);
 void initialize(message_queue_t *q);
@@ -143,7 +144,8 @@ void *threadfuntion(void *arg)
 {	
 	client_t cli = *(client_t*)arg;            /* get & convert the socket */
 	char buffer[256];
-
+	int error_flag = 0;
+	socklen_t len = sizeof (error_flag);
 
 	recv(cli.sd_id,buffer,sizeof(buffer),0);
 	strcpy(cli.name, buffer);
@@ -154,20 +156,28 @@ void *threadfuntion(void *arg)
 
 	while (1)
 	{
+
 		if(recv(cli.sd_id,buffer,sizeof(buffer),0))
 		{
 			send_message_handler(buffer, cli);
 		}
+		else
+		{
+			break;
+		}
 	}
 	
+	remove_clients(cli);
 
+	printf("o cliente: %s saiu do chat", cli.name);
 	//send(cli.sd_id,buffer,sizeof(buffer),0);
 
-	// shutdown(cli.sd_id,SHUT_RD);
-	// shutdown(cli.sd_id,SHUT_WR);
-	// shutdown(cli.sd_id,SHUT_RDWR);
+	shutdown(cli.sd_id,SHUT_RD);
+	shutdown(cli.sd_id,SHUT_WR);
+	shutdown(cli.sd_id,SHUT_RDWR);
 	// 		                  /* close the client's channel */
-	return 0;                           /* terminate the thread */
+	pthread_exit(NULL);
+	//return 0;                           /* terminate the thread */
 }
 
 
