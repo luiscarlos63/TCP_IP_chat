@@ -6,11 +6,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <time.h>
 
 void panic(char *msg);
 #define panic(m)	{perror(m); abort();}
 #define MAX_CLIENTS 10
-
+#define CHECK_TIME 5
 
 //structs
 typedef struct client_s{
@@ -43,6 +44,7 @@ typedef struct message_queue_s
 //prototipos
 void *threadfuntion(void *arg);
 void* th_sender_fun(void* arg);
+void* th_status_checker_fun(void* arg);
 
 void insert_client(client_t cli);
 client_t remove_clients(client_t cli);
@@ -57,14 +59,14 @@ message_t dequeue(message_queue_t *q);
 client_t client_arry[MAX_CLIENTS];
 message_queue_t message_queue;
 
-pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER, mutex2 = PTHREAD_MUTEX_INITIALIZER;
-pthread_cond_t condition = PTHREAD_COND_INITIALIZER;
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER, mutex2 = PTHREAD_MUTEX_INITIALIZER, mutex_time = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t condition = PTHREAD_COND_INITIALIZER, condition_time = PTHREAD_COND_INITIALIZER;
 
 int main(int count, char *args[])
 {	
 	struct sockaddr_in serv_addr, cli_addr;
 	int listen_sd, port;
-	pthread_t th_sender;
+	pthread_t th_sender, th_status_checker;
 
 	initialize(&message_queue);
 
@@ -111,6 +113,8 @@ int main(int count, char *args[])
 
 	pthread_create(&th_sender, NULL, th_sender_fun, NULL);
 	pthread_detach(th_sender);                      /* don't track it */
+	pthread_create(&th_status_checker, NULL, th_status_checker_fun, NULL);
+	pthread_detach(th_status_checker);                      /* don't track it */
 
 	/*--- make into listener with 10 slots ---*/
 	if ( listen(listen_sd, 10) != 0 )
@@ -135,7 +139,7 @@ int main(int count, char *args[])
 			}
 		}
 	}
-}
+}	//fim da main
 
 
 
@@ -220,6 +224,33 @@ void* th_sender_fun(void* arg)
 
 
 }
+
+
+void* th_status_checker_fun(void* arg)
+{
+	int i = 0;
+	struct timespec sleep_until;
+	
+	while (1)
+	{
+		pthread_mutex_lock(&mutex_time);
+		sleep_until.tv_sec = (time(NULL) + CHECK_TIME);		//CHECK_TIME represena 5 segundos
+		sleep_until.tv_nsec = 0;
+
+		// for(i = 0; i < MAX_CLIENTS; i++)
+		// {
+		// 	if(client_arry[i].sd_id != 0)
+		// 	{
+		// 		check_cli_status(client_arry[i]);
+		// 	}
+		// }	
+		pthread_cond_timedwait(&condition_time, &mutex_time, &sleep_until);
+		printf("time for check");
+		pthread_mutex_unlock(&mutex_time);
+	}
+}
+
+
 
 // +++++++++++++++++++++++++++++++++++++++++ FUNÇOES PARA METER E TIRAR clientes da lista +++++++++++++++++++++++
 void insert_client(client_t cli)

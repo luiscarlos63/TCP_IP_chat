@@ -14,12 +14,28 @@
 #include <string.h>
 #include <pthread.h>
 #include <ctype.h>
+#include <time.h>
 
 void panic(char *msg);
 #define panic(m)	{perror(m); abort();}
 
+typedef enum status
+{
+	ONLINE,
+	AFK
+}status_e;
+
 //prototipos
 void* th_receiver_func(void* arg);
+void* th_status_update_func(void* arg);
+
+//variaveis globais
+status_e cli_status = ONLINE;
+
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t condition_send = PTHREAD_COND_INITIALIZER, condition_ellapsed = PTHREAD_COND_INITIALIZER;
+
+
 
 /****************************************************************************/
 /*** This program opens a connection to a server using either a port or a ***/
@@ -33,7 +49,10 @@ int main(int count, char *args[])
 	struct sockaddr_in addr;
 	int sd, port;
 	char name[20];
-	pthread_t th_receiver;
+	pthread_t th_receiver, th_status_update;
+	struct timespec time_last_send;
+
+	
 
 	if ( count != 4 )
 	{
@@ -66,6 +85,9 @@ int main(int count, char *args[])
 
 	strcpy(name, args[3]);
 
+
+	pthread_create(&th_status_update, NULL, th_status_update_func, &time_last_send);
+
 	/*---If connection successful, send the message and read results---*/
 	if ( connect(sd, (struct sockaddr*)&addr, sizeof(addr)) == 0)
 	{	
@@ -80,7 +102,11 @@ int main(int count, char *args[])
 			if(scanf("%[^\n]s", buffer))
 			{
 				send(sd, buffer, sizeof(buffer), 0);
+				cli_status = ONLINE;
+				time_last_send.tv_sec = time(NULL);		//
+				pthread_cond_signal(&condition_send);
 				while((getchar()) != '\n');
+
 			}
 			
 		}
@@ -101,4 +127,29 @@ void* th_receiver_func(void* arg)
 		if(recv(sd, buffer, sizeof(buffer), 0))
 			printf("%s\n", buffer);
 	}
+}
+
+
+
+void* th_status_update_func(void* arg)
+{
+	struct timespec* time_last_send = ((struct timespec*)arg);
+	struct timespec time_aux;
+
+	while (1)
+	{
+		time_aux.tv_sec = time(NULL) + 10;	//checks every 10 secons
+		time_aux.tv_nsec = 0;
+		
+		pthread_cond_timedwait(&condition_send, &mutex, &time_aux);
+		{
+			if(time_aux.tv_sec >= time_last_send->tv_sec + 60) 
+			{
+					//posso por aqui outro condition varibel que para este processo ate efetivamente
+					//	ocorrer outro "send" e com isto aumentar a resoluçao do check
+				cli_status = AFK;
+			}
+		}		
+	}
+	
 }
