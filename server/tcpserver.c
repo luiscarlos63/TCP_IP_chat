@@ -226,6 +226,7 @@ void* th_sender_fun(void* arg)
 }
 
 
+/*FUNÇAO AINDA INACABADA*/
 void* th_status_checker_fun(void* arg)
 {
 	int i = 0;
@@ -244,8 +245,8 @@ void* th_status_checker_fun(void* arg)
 		// 		check_cli_status(client_arry[i]);
 		// 	}
 		// }	
+		
 		pthread_cond_timedwait(&condition_time, &mutex_time, &sleep_until);
-		printf("time for check");
 		pthread_mutex_unlock(&mutex_time);
 	}
 }
