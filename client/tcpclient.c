@@ -80,6 +80,7 @@ int main(int count, char *args[])
 			if(scanf("%[^\n]s", buffer))
 			{
 				send(sd, buffer, sizeof(buffer), 0);
+				while((getchar()) != '\n');
 			}
 			
 		}
