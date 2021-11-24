@@ -103,13 +103,14 @@ int main(int count, char *args[])
 			if(scanf("%[^\n]s", buffer))
 			{
 				send(sd, buffer, sizeof(buffer), 0);
-				cli_status = ONLINE;
-				time_last_send.tv_sec = time(NULL);		//
-				pthread_cond_signal(&condition_send);
-				while((getchar()) != '\n');
+				cli_status = ONLINE;	
+				
+				time_last_send.tv_sec = time(NULL);		//Registao tempo em que mandou a ultima mensagem
 
+				pthread_cond_signal(&condition_send);	
+				
+				while((getchar()) != '\n');	//reset para o scanf
 			}
-			
 		}
 	}
 	else
@@ -127,7 +128,7 @@ void* th_receiver_func(void* arg)
 	{
 		if(recv(sd, buffer, sizeof(buffer), 0))
 		{
-			//como nese momento so existe este comando nao sera necesario em parsing mais complexo()
+			//como neste momento so existe este comando nao sera necesario em parsing mais complexo()
 			if(strcmp(buffer, "!status") == 0)		
 			{
 				char status_str[20];
@@ -139,10 +140,13 @@ void* th_receiver_func(void* arg)
 			{		//caso nao seja um comando simplemte da print à mensagem
 				printf("%s\n", buffer);
 			}
-			
 		}
-			
+		else	//o server desconectou-se
+		{	
+			break;
+		}	
 	}
+	pthread_exit(NULL);
 }
 
 
@@ -167,7 +171,6 @@ void* th_status_update_func(void* arg)
 			}
 		}		
 	}
-	
 }
 
 
