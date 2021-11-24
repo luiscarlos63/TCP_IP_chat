@@ -13,10 +13,18 @@ void panic(char *msg);
 #define MAX_CLIENTS 10
 #define CHECK_TIME 5
 
+
 //structs
+typedef enum status
+{
+	ONLINE,
+	AFK
+}status_e;
+
 typedef struct client_s{
 	int sd_id;
 	char name[20];
+	status_e status;
 	pthread_t th_id;
 }client_t;
 
@@ -48,12 +56,18 @@ void* th_status_checker_fun(void* arg);
 
 void insert_client(client_t cli);
 client_t remove_clients(client_t cli);
+int client_exits(client_t cli);
+void client_status_update(const client_t* cli);
 
 void send_message_handler(char* buffer, client_t cli);
 void initialize(message_queue_t *q);
 int isempty(message_queue_t *q);
 void enqueue(message_queue_t *q, message_t message);
 message_t dequeue(message_queue_t *q);
+
+void client_status_request(client_t cli);
+status_e get_cli_status(char* status_str);
+
 
 //variaveis globais
 client_t client_arry[MAX_CLIENTS];
@@ -75,6 +89,7 @@ int main(int count, char *args[])
 	for (int i = 0; i < MAX_CLIENTS; i++)
 	{
 		client_arry[i].sd_id = 0;
+		client_arry[i].status = ONLINE;
 	}
 	
 
@@ -161,12 +176,21 @@ void *threadfuntion(void *arg)
 	while (1)
 	{
 
-		if(recv(cli.sd_id,buffer,sizeof(buffer),0))
+		if(recv(cli.sd_id, buffer, sizeof(buffer), 0))
 		{
-			send_message_handler(buffer, cli);
+			if(buffer[0] == '!')	//verifica se é comando
+			{
+				cli.status = get_cli_status(buffer);
+				client_status_update(&cli);
+			}
+			else
+			{
+				send_message_handler(buffer, cli);
+			}
+			
 		}
 		else
-		{
+		{	
 			break;
 		}
 	}
@@ -238,13 +262,13 @@ void* th_status_checker_fun(void* arg)
 		sleep_until.tv_sec = (time(NULL) + CHECK_TIME);		//CHECK_TIME represena 5 segundos
 		sleep_until.tv_nsec = 0;
 
-		// for(i = 0; i < MAX_CLIENTS; i++)
-		// {
-		// 	if(client_arry[i].sd_id != 0)
-		// 	{
-		// 		check_cli_status(client_arry[i]);
-		// 	}
-		// }	
+		for(i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(client_arry[i].sd_id != 0)
+			{
+				client_status_request(client_arry[i]);
+			}
+		}	
 		
 		pthread_cond_timedwait(&condition_time, &mutex_time, &sleep_until);
 		pthread_mutex_unlock(&mutex_time);
@@ -281,6 +305,35 @@ client_t remove_clients(client_t cli)
 		{
 			client_arry[i].sd_id = 0;
 			return cli;
+		}
+	}
+}
+
+int client_exits(client_t cli)
+{
+	int i = 0;
+	int flag = -1;
+
+	for(i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(cli.sd_id == client_arry[i].sd_id)
+		{
+			flag = 1;
+			break;
+		}
+	}
+	return flag;
+}
+
+void client_status_update(const client_t* cli)
+{
+	int i = 0;
+
+	for (i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(cli->sd_id == client_arry[i].sd_id)
+		{
+			client_arry[i].status = cli->status;
 		}
 	}
 }
@@ -363,4 +416,29 @@ message_t dequeue(message_queue_t *q)
 }
 
 
+// ---------------------------------------	FUNÇAO QUE MANDA O STATUS REQUEST PARA O CLIENTE --------------------------
+// isto é feito atraves de enviar uma mensagem para esse cliente atraves da QUEUE 
+//	com um carater especial para identificar que se trata de um comando  e nao de uma mensagem -------------------  
+void client_status_request(client_t cli)
+{
+	char command[50];
 
+	if(client_exits(cli))
+	{
+		strcpy(command, "!status");	// '!' funciona como caracter de identificaçao de comando (tipo bot do discord)
+		send(cli.sd_id, command, sizeof(command), 0);	//manda para o cliente, (bypasses the MESSAGE QUEUE)
+	}
+}
+
+status_e get_cli_status(char* status_str)
+{
+
+	if(strcmp(status_str, "!status AFK") == 0)
+	{
+		return AFK;
+	}
+	if(strcmp(status_str, "!status ONLINE") == 0)
+	{
+		return ONLINE;
+	}
+}

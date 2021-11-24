@@ -28,12 +28,13 @@ typedef enum status
 //prototipos
 void* th_receiver_func(void* arg);
 void* th_status_update_func(void* arg);
+void get_status(char* status_str);
 
 //variaveis globais
 status_e cli_status = ONLINE;
 
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-pthread_cond_t condition_send = PTHREAD_COND_INITIALIZER, condition_ellapsed = PTHREAD_COND_INITIALIZER;
+pthread_cond_t condition_send = PTHREAD_COND_INITIALIZER; // condition_ellapsed = PTHREAD_COND_INITIALIZER;
 
 
 
@@ -125,7 +126,22 @@ void* th_receiver_func(void* arg)
 	while(1)
 	{
 		if(recv(sd, buffer, sizeof(buffer), 0))
-			printf("%s\n", buffer);
+		{
+			//como nese momento so existe este comando nao sera necesario em parsing mais complexo()
+			if(strcmp(buffer, "!status") == 0)		
+			{
+				char status_str[20];
+				get_status(status_str);			//junta tudo na mesma mensagem
+				strcat(buffer, status_str);	
+				send(sd, buffer, sizeof(buffer), 0);	//manda
+			}	
+			else	
+			{		//caso nao seja um comando simplemte da print à mensagem
+				printf("%s\n", buffer);
+			}
+			
+		}
+			
 	}
 }
 
@@ -153,3 +169,17 @@ void* th_status_update_func(void* arg)
 	}
 	
 }
+
+
+void get_status(char* status_str)
+{
+	if(cli_status == AFK)
+	{
+		strcpy(status_str, " AFK");
+	}
+	else if(cli_status == ONLINE)
+		 {
+			strcpy(status_str, " ONLINE");
+		 }
+}
+
