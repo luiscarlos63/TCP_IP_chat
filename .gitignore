@@ -6,3 +6,5 @@ client/tcpclient.elf
 client/.vscode/launch.json
 client/.vscode/tasks.json
 client/tcpclient
+client/Emb_tcpclient.elf
+server/Emb_tcpserver.elf
