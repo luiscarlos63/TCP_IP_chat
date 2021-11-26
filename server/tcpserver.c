@@ -178,12 +178,12 @@ void *threadfuntion(void *arg)
 
 
 	strcpy(buffer, " juntou-se ao chat\n");
-	send_message_handler(buffer, cli);				//esta funçao ira mandar a 
+	send_message_handler(buffer, cli);				//esta funçao ira anunciar que um cliente chegou
 	
 	
 	while (1)
 	{
-		if(recv(cli.sd_id, buffer, sizeof(buffer), 0))
+		if(error_flag = recv(cli.sd_id, buffer, sizeof(buffer), 0))
 		{
 			if(buffer[0] == '!')	//verifica se é comando
 			{
@@ -192,6 +192,7 @@ void *threadfuntion(void *arg)
 			}
 			else
 			{
+				printf("recebi %d bytes\n", error_flag);
 				send_message_handler(buffer, cli);
 			}
 		}
@@ -205,12 +206,12 @@ void *threadfuntion(void *arg)
 	remove_clients(cli);
 
 	printf("o cliente: %s saiu do chat", cli.name);
-	//send(cli.sd_id,buffer,sizeof(buffer),0);
 
+	/* close the client's channel */
 	shutdown(cli.sd_id,SHUT_RD);
 	shutdown(cli.sd_id,SHUT_WR);
 	shutdown(cli.sd_id,SHUT_RDWR);
-	// 		                  /* close the client's channel */
+		                  
 	pthread_exit(NULL);
 	//return 0;                           /* terminate the thread */
 }
@@ -257,7 +258,6 @@ void* th_sender_fun(void* arg)
 }
 
 
-/*FUNÇAO AINDA INACABADA*/
 void* th_status_checker_fun(void* arg)
 {
 	int i = 0;

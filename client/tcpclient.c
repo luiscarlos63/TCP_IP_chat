@@ -102,7 +102,7 @@ int main(int count, char *args[])
 		{
 			if(scanf("%[^\n]s", buffer))
 			{
-				send(sd, buffer, sizeof(buffer), 0);
+				send(sd, buffer, strlen(buffer) + 1, 0);
 				cli_status = ONLINE;	
 				
 				time_last_send.tv_sec = time(NULL);		//Registao tempo em que mandou a ultima mensagem
