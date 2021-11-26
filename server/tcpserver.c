@@ -10,6 +10,7 @@
 
 void panic(char *msg);
 #define panic(m)	{perror(m); abort();}
+
 #define MAX_CLIENTS 10
 #define CHECK_TIME 5
 
@@ -35,12 +36,12 @@ typedef struct message_s
 }message_t;
 
 
-struct node_s
+typedef struct node_s
 {
     message_t message;
     struct node_s *next;
-};
-typedef struct node_s node_t;
+}node_t;
+
 
 typedef struct message_queue_s
 {
@@ -48,6 +49,7 @@ typedef struct message_queue_s
     node_t *front;
     node_t *rear;
 }message_queue_t;
+
 
 //prototipos
 void *threadfuntion(void *arg);
@@ -69,12 +71,16 @@ void client_status_request(client_t cli);
 status_e get_cli_status(char* status_str);
 
 
-//variaveis globais
+//variaveis globais hehe
 client_t client_arry[MAX_CLIENTS];
 message_queue_t message_queue;
 
-pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER, mutex2 = PTHREAD_MUTEX_INITIALIZER, mutex_time = PTHREAD_MUTEX_INITIALIZER;
-pthread_cond_t condition = PTHREAD_COND_INITIALIZER, condition_time = PTHREAD_COND_INITIALIZER;
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER, 
+				mutex2 = PTHREAD_MUTEX_INITIALIZER, 
+				mutex_time = PTHREAD_MUTEX_INITIALIZER;
+
+pthread_cond_t condition = PTHREAD_COND_INITIALIZER, 
+				condition_time = PTHREAD_COND_INITIALIZER;
 
 int main(int count, char *args[])
 {	
@@ -159,23 +165,24 @@ int main(int count, char *args[])
 
 
 
-void *threadfuntion(void *arg)                    
+void *threadfuntion(void *arg)
 {	
 	client_t cli = *(client_t*)arg;            /* get & convert the socket */
 	char buffer[256];
 	int error_flag = 0;
 	socklen_t len = sizeof (error_flag);
 
+	//receive the name of the client
 	recv(cli.sd_id,buffer,sizeof(buffer),0);
 	strcpy(cli.name, buffer);
-	printf("%s: ola meus putos\n", cli.name);
-	
+
+
 	strcpy(buffer, " juntou-se ao chat\n");
 	send_message_handler(buffer, cli);				//esta funçao ira mandar a 
-
+	
+	
 	while (1)
 	{
-
 		if(recv(cli.sd_id, buffer, sizeof(buffer), 0))
 		{
 			if(buffer[0] == '!')	//verifica se é comando
@@ -187,10 +194,10 @@ void *threadfuntion(void *arg)
 			{
 				send_message_handler(buffer, cli);
 			}
-			
 		}
 		else
 		{	
+			send_message_handler("desconectou-se...", cli);
 			break;
 		}
 	}
