@@ -15,7 +15,7 @@ void panic(char *msg);
 #define CHECK_TIME 5
 
 
-//structs
+//structs and enums
 typedef enum status
 {
 	ONLINE,
