@@ -5,7 +5,7 @@ CFLAGS= -g -pthread
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 tcpserver: tcpserver.o
-	$(CC) -o tcpserver tcpserver.o $(CFLAGS)
+	$(CC) -o tcpserver.elf tcpserver.o $(CFLAGS)
 
 
 

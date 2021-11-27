@@ -8,6 +8,7 @@
 #include <ctype.h>
 #include <time.h>
 
+
 void panic(char *msg);
 #define panic(m)	{perror(m); abort();}
 
