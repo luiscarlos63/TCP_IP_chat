@@ -25,6 +25,18 @@ typedef enum status
 	AFK
 }status_e;
 
+typedef enum stream_type
+{
+	MESSAGE,
+	COMMAND
+}stream_type_e;
+
+typedef struct package_s
+{
+	stream_type_e type;
+	char buff[256];
+}package_t;
+
 //prototipos
 void* th_receiver_func(void* arg);
 void* th_status_update_func(void* arg);
@@ -92,17 +104,21 @@ int main(int count, char *args[])
 	/*---If connection successful, send the message and read results---*/
 	if ( connect(sd, (struct sockaddr*)&addr, sizeof(addr)) == 0)
 	{	
-        char buffer[256];
+        //char buffer[256];
+		package_t pack;
 
-		send(sd, name,sizeof(name),0);                     /* send name to server*/
+		pack.type = MESSAGE;	//not needed here but if done here doesn't need to be done again in the loop...
+		strcpy(pack.buff, name);
+		send(sd, &pack, sizeof(pack),0);                     /* send name to server*/
 
 		pthread_create(&th_receiver, NULL, th_receiver_func, &sd);		
 
 		while(1)
 		{
-			if(scanf("%[^\n]s", buffer))
+			if(scanf("%[^\n]s", pack.buff))
 			{
-				send(sd, buffer, sizeof(buffer), 0);
+				//pack.type = MESSAGE;	//not needed here (never changes)
+				send(sd, &pack, sizeof(pack), 0);
 				cli_status = ONLINE;	
 				
 				time_last_send.tv_sec = time(NULL);		//Registao tempo em que mandou a ultima mensagem
@@ -122,23 +138,25 @@ int main(int count, char *args[])
 void* th_receiver_func(void* arg)
 {
 	int sd = *((int*)arg);
-	char buffer[256];
+	//char buffer[256];
+	package_t pack;
+
 
 	while(1)
 	{
-		if(recv(sd, buffer, sizeof(buffer), 0))
+		if(recv(sd, &pack, sizeof(pack), 0))
 		{
-			//como neste momento so existe este comando nao sera necesario em parsing mais complexo()
-			if(strcmp(buffer, "!status") == 0)		
+			//como neste momento so existe este comando nao sera necesario um parsing mais complexo()
+			if(pack.type == COMMAND)		
 			{
 				char status_str[20];
 				get_status(status_str);			//junta tudo na mesma mensagem
-				strcat(buffer, status_str);	
-				send(sd, buffer, sizeof(buffer), 0);	//manda
+				strcat(pack.buff, status_str);	
+				send(sd, &pack, sizeof(pack), 0);	//manda
 			}	
 			else	
 			{		//caso nao seja um comando simplemte da print à mensagem
-				printf("%s\n", buffer);
+				printf("%s\n", pack.buff);
 			}
 		}
 		else	//o server desconectou-se

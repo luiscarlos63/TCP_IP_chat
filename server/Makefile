@@ -5,10 +5,10 @@ CFLAGS= -g -pthread
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 tcpserver: tcpserver.o
-	$(CC) -o tcpserver tcpserver.o $(CFLAGS)
+	$(CC) -o tcpserver.elf tcpserver.o $(CFLAGS)
 
 
 
 .PHONY: clean
 clean:
-	rm -rf tcpserver *.o
+	rm -rf tcpserver.elf *.o

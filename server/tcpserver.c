@@ -8,6 +8,7 @@
 #include <ctype.h>
 #include <time.h>
 
+
 void panic(char *msg);
 #define panic(m)	{perror(m); abort();}
 
@@ -15,12 +16,18 @@ void panic(char *msg);
 #define CHECK_TIME 5
 
 
-//structs
+//structs and enums
 typedef enum status
 {
 	ONLINE,
 	AFK
 }status_e;
+
+typedef enum stream_type
+{
+	MESSAGE,
+	COMMAND
+}stream_type_e;
 
 typedef struct client_s{
 	int sd_id;
@@ -29,10 +36,19 @@ typedef struct client_s{
 	pthread_t th_id;
 }client_t;
 
+
+typedef struct package_s
+{
+	stream_type_e type;
+	char buff[256];
+}package_t;
+
+
+
 typedef struct message_s
 {
 	client_t cli;
-	char buff[256];
+	package_t package;
 }message_t;
 
 
@@ -52,7 +68,7 @@ typedef struct message_queue_s
 
 
 //prototipos
-void *threadfuntion(void *arg);
+void *th_cli_read_fun(void *arg);
 void* th_sender_fun(void* arg);
 void* th_status_checker_fun(void* arg);
 
@@ -61,10 +77,10 @@ client_t remove_clients(client_t cli);
 int client_exits(client_t cli);
 void client_status_update(const client_t* cli);
 
-void send_message_handler(char* buffer, client_t cli);
+void send_message_handler(const message_t* message);
 void initialize(message_queue_t *q);
 int isempty(message_queue_t *q);
-void enqueue(message_queue_t *q, message_t message);
+void enqueue(message_queue_t *q, const message_t* message);
 message_t dequeue(message_queue_t *q);
 
 void client_status_request(client_t cli);
@@ -147,15 +163,14 @@ int main(int count, char *args[])
 
 		while (1)                         /* process all incoming clients */
 		{
-			client_t cli;
+			int sd;
 			int n = sizeof(cli_addr);
-			cli.sd_id = accept(listen_sd, (struct sockaddr*)&cli_addr, &n);     /* accept connection */
-			if(cli.sd_id!=-1)
+			sd = accept(listen_sd, (struct sockaddr*)&cli_addr, &n);     /* accept connection */
+			if(sd!=-1)
 			{
 				pthread_t child;
-				insert_client(cli);
 				printf("New connection\n");
-				pthread_create(&child, 0, threadfuntion, &cli);       /* start thread */
+				pthread_create(&child, 0, th_cli_read_fun, &sd);       /* start thread */
 				pthread_detach(child);                      /* don't track it */
 			}
 		}
@@ -165,52 +180,61 @@ int main(int count, char *args[])
 
 
 
-void *threadfuntion(void *arg)
+void *th_cli_read_fun(void *arg)
 {	
-	client_t cli = *(client_t*)arg;            /* get & convert the socket */
-	char buffer[256];
-	int error_flag = 0;
-	socklen_t len = sizeof (error_flag);
+//	client_t cli;            /* get & convert the socket */
+//	package_t package;
+	message_t message;
+
+	//int error_flag = 0;
+
+	message.cli.sd_id = *(int*)arg;
 
 	//receive the name of the client
-	recv(cli.sd_id,buffer,sizeof(buffer),0);
-	strcpy(cli.name, buffer);
+	recv(message.cli.sd_id, &message.package, sizeof(message.package), 0);
+	strcpy(message.cli.name, message.package.buff);
 
+	insert_client(message.cli);		//insere o cliente na lista
 
-	strcpy(buffer, " juntou-se ao chat\n");
-	send_message_handler(buffer, cli);				//esta funçao ira mandar a 
+	//esta funçao ira anunciar que um cliente chegou
+	strcpy(message.package.buff, " juntou-se ao chat\n");
+	message.package.type = MESSAGE;
+	send_message_handler(&message);				
 	
 	
 	while (1)
 	{
-		if(recv(cli.sd_id, buffer, sizeof(buffer), 0))
+		if(recv(message.cli.sd_id, &message.package, sizeof(message.package), 0))
 		{
-			if(buffer[0] == '!')	//verifica se é comando
+			if(message.package.type == COMMAND)	//verifica se é comando 
 			{
-				cli.status = get_cli_status(buffer);
-				client_status_update(&cli);
+				//message.cli.status = get_cli_status(buffer);
+				client_status_update(&message.cli);			//(neste momento so existe um comando)
 			}
 			else
 			{
-				send_message_handler(buffer, cli);
+				message.package.type = MESSAGE;
+				send_message_handler(&message);
 			}
 		}
 		else
 		{	
-			send_message_handler("desconectou-se...", cli);
+			strcpy(message.package.buff, "desconectou-se...");
+			message.package.type = MESSAGE;
+			send_message_handler(&message);
 			break;
 		}
 	}
 	
-	remove_clients(cli);
+	remove_clients(message.cli);
 
-	printf("o cliente: %s saiu do chat", cli.name);
-	//send(cli.sd_id,buffer,sizeof(buffer),0);
+	printf("o cliente: %s saiu do chat", message.cli.name);
 
-	shutdown(cli.sd_id,SHUT_RD);
-	shutdown(cli.sd_id,SHUT_WR);
-	shutdown(cli.sd_id,SHUT_RDWR);
-	// 		                  /* close the client's channel */
+	/* close the client's channel */
+	shutdown(message.cli.sd_id,SHUT_RD);
+	shutdown(message.cli.sd_id,SHUT_WR);
+	shutdown(message.cli.sd_id,SHUT_RDWR);
+		                  
 	pthread_exit(NULL);
 	//return 0;                           /* terminate the thread */
 }
@@ -219,7 +243,7 @@ void *threadfuntion(void *arg)
 void* th_sender_fun(void* arg)
 {
 	message_t message;
-	char buff[256];		
+	package_t aux_pack;		
 
 	while(1)
 	{
@@ -229,25 +253,26 @@ void* th_sender_fun(void* arg)
 			message = dequeue(&message_queue);
 			if(message.cli.sd_id != -1)
 			{
-				strcpy(buff, message.cli.name); //copia para o buffer o nome do cliente que esta a mandar a mensagem
-				strcat(buff, ": ");
-				strcat(buff, message.buff);
+				aux_pack.type = MESSAGE;
+				strcpy(aux_pack.buff, message.cli.name); //copia para o buffer o nome do cliente que esta a mandar a mensagem
+				strcat(aux_pack.buff, ": ");
+				strcat(aux_pack.buff, message.package.buff);
 
 				for (int i = 0; i < MAX_CLIENTS; i++)
 				{
 					/* Envia para todos os clientes menos para o proprio
-						Tambem verifica se o cliente existe id =/= 0
+						Tambem verifica se o cliente existe (id =/= 0)
 					*/
 					if((client_arry[i].sd_id != message.cli.sd_id) && (client_arry[i].sd_id != 0))
 					{
-						send(client_arry[i].sd_id, buff, sizeof(buff), 0);
+						send(client_arry[i].sd_id, &aux_pack, sizeof(aux_pack), 0);
 					}
 				}
 			}
 		}
 		else
 		{
-			//waits ultil a signal	
+			//waits until a signal	
 			pthread_cond_wait(&condition, &mutex);
 		}
 		pthread_mutex_unlock(&mutex);
@@ -257,7 +282,6 @@ void* th_sender_fun(void* arg)
 }
 
 
-/*FUNÇAO AINDA INACABADA*/
 void* th_status_checker_fun(void* arg)
 {
 	int i = 0;
@@ -347,13 +371,8 @@ void client_status_update(const client_t* cli)
 
 
 //--------------------------------	FUNÇOES para meter a mensagem numa "queqe" e MAIS ----------------------
-void send_message_handler(char* buffer, client_t cli)
+void send_message_handler(const message_t* message)
 {
-	message_t message;
-	
-	strcpy(message.buff, buffer);
-	message.cli = cli;
-
 	enqueue(&message_queue, message);
 	pthread_cond_signal(&condition);
 }
@@ -370,15 +389,19 @@ int isempty(message_queue_t *q)
     return (q->front == NULL);
 }
 
-void enqueue(message_queue_t *q, message_t message)
+void enqueue(message_queue_t *q, const message_t* message)
 {
 	pthread_mutex_lock(&mutex);
 		if (q->count < MAX_CLIENTS)
 		{
 			node_t *tmp;
 			tmp = malloc(sizeof(node_t));
-			tmp->message = message;
+
+			//copy paremeters "by hand" as both are pointers 
+			tmp->message.cli = message->cli;
+			tmp->message.package = message->package;
 			tmp->next = NULL;
+
 			if(!isempty(q))
 			{
 				q->rear->next = tmp;
@@ -428,12 +451,13 @@ message_t dequeue(message_queue_t *q)
 //	com um carater especial para identificar que se trata de um comando  e nao de uma mensagem -------------------  
 void client_status_request(client_t cli)
 {
-	char command[50];
-
+	package_t pack;
+		
 	if(client_exits(cli))
 	{
-		strcpy(command, "!status");	// '!' funciona como caracter de identificaçao de comando (tipo bot do discord)
-		send(cli.sd_id, command, sizeof(command), 0);	//manda para o cliente, (bypasses the MESSAGE QUEUE)
+		pack.type = COMMAND;
+		strcpy(pack.buff, "!status");	// '!' funciona como caracter de identificaçao de comando (tipo bot do discord)
+		send(cli.sd_id, &pack, sizeof(pack), 0);	//manda para o cliente, (bypasses the MESSAGE QUEUE)
 	}
 }
 
