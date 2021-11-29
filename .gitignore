@@ -8,3 +8,7 @@ client/.vscode/tasks.json
 client/tcpclient
 client/Emb_tcpclient.elf
 server/Emb_tcpserver.elf
+server/tcpserver.o
+client/send_out.elf
+client/send_out.o
+client/tcpclient.o
