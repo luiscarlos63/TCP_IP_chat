@@ -42,6 +42,10 @@ void* th_receiver_func(void* arg);
 void* th_status_update_func(void* arg);
 void get_status(char* status_str);
 
+
+void led_turn_ON();
+void led_turn_OFF();
+
 //variaveis globais
 status_e cli_status = ONLINE;
 
@@ -157,6 +161,10 @@ void* th_receiver_func(void* arg)
 			else	
 			{		//caso nao seja um comando simplemte da print à mensagem
 				printf("%s\n", pack.buff);
+
+				#ifdef BOOST_ARCH_ARM		//apenas se for par a rasp
+					led_turn_ON();
+				#endif
 			}
 		}
 		else	//o server desconectou-se
@@ -176,11 +184,14 @@ void* th_status_update_func(void* arg)
 
 	while (1)
 	{
-		time_aux.tv_sec = time(NULL) + 10;	//checks every 10 secons
+		time_aux.tv_sec = time(NULL) + 2;	//checks every 10 secons
 		time_aux.tv_nsec = 0;
 		
 		pthread_cond_timedwait(&condition_send, &mutex, &time_aux);
 		{
+			#ifdef BOOST_ARCH_ARM		//apenas se for par a rasp
+				led_turn_OFF();
+			#endif
 			if(time_aux.tv_sec >= time_last_send->tv_sec + 60) 
 			{
 					//posso por aqui outro condition varibel que para este processo ate efetivamente
@@ -202,5 +213,16 @@ void get_status(char* status_str)
 		 {
 			strcpy(status_str, " ONLINE");
 		 }
+}
+
+
+void led_turn_ON()
+{
+	system("echo 1 >/dev/led0");
+}
+
+void led_turn_OFF()
+{
+	system("echo 0 >/dev/led0");
 }
 
