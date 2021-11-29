@@ -121,7 +121,7 @@ int main(int count, char *args[])
 				send(sd, &pack, sizeof(pack), 0);
 				cli_status = ONLINE;	
 				
-				time_last_send.tv_sec = time(NULL);		//Registao tempo em que mandou a ultima mensagem
+				time_last_send.tv_sec = time(NULL);		//Regista o tempo em que mandou a ultima mensagem
 
 				pthread_cond_signal(&condition_send);	
 				
