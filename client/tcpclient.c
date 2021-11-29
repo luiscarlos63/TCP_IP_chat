@@ -19,6 +19,13 @@
 void panic(char *msg);
 #define panic(m)	{perror(m); abort();}
 
+/* name of the POSIX object referencing the queue */
+#define MSGQOBJ_NAME    "/myqueue123"
+/* max length of a message (just for this process) */
+#define MAX_MSG_LEN     250
+
+
+
 typedef enum status
 {
 	ONLINE,
@@ -65,6 +72,7 @@ int main(int count, char *args[])
 	pthread_t th_receiver, th_status_update;
 	struct timespec time_last_send;
 
+	
 	
 
 	if ( count != 4 )

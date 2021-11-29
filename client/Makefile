@@ -1,5 +1,5 @@
 CC=gcc#arm-buildroot-linux-gnueabihf-gcc
-CFLAGS= -g -pthread
+CFLAGS= -g -pthread -lrt
 
 
 %.o: %.c 
