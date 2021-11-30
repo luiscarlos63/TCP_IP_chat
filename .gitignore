@@ -12,3 +12,5 @@ server/tcpserver.o
 client/tcpclient.o
 client/send_out.elf
 client/send_out.o
+client/send_message.elf
+client/send_message.o
