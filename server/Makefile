@@ -11,4 +11,4 @@ tcpserver: tcpserver.o
 
 .PHONY: clean
 clean:
-	rm -rf tcpserver.elf *.o
+	rm -rf *.elf *.o
