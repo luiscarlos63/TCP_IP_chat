@@ -40,6 +40,8 @@ typedef struct package_s
 //prototipos
 void* th_receiver_func(void* arg);
 void* th_status_update_func(void* arg);
+void* th_led_timer(void* arg);
+
 void get_status(char* status_str);
 
 
@@ -52,6 +54,8 @@ status_e cli_status = ONLINE;
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t condition_send = PTHREAD_COND_INITIALIZER; // condition_ellapsed = PTHREAD_COND_INITIALIZER;
 
+pthread_mutex_t mutex_timer = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t condition_timer = PTHREAD_COND_INITIALIZER; // condition_ellapsed = PTHREAD_COND_INITIALIZER;
 
 
 /****************************************************************************/
@@ -104,8 +108,9 @@ int main(int count, char *args[])
 
 
 	pthread_create(&th_status_update, NULL, th_status_update_func, &time_last_send);
-	
-	//apenas se for par a rasp
+	pthread_create(&th_status_update, NULL, th_led_timer, NULL);
+
+	//iniciar o modulo de driver do led
 	system("insmod led.ko");
 	
 
@@ -166,10 +171,12 @@ void* th_receiver_func(void* arg)
 			{	//caso nao seja um comando simplemte da print à mensagem
 				printf("%s\n", pack.buff);
 				led_turn_ON();
+				pthread_cond_signal(&condition_timer);	//envia o sinal para que o thread possa apagar o led 1 segundo depois
 			}
 		}
 		else	//o server desconectou-se
 		{	
+			printf("server down...\n");
 			break;
 		}	
 	}
@@ -198,6 +205,22 @@ void* th_status_update_func(void* arg)
 			}
 		}		
 	}
+
+	pthread_exit(NULL);
+}
+
+
+void* th_led_timer(void* arg)
+{
+
+	while (1)
+	{
+		pthread_cond_wait(&condition_timer, &mutex_timer);
+		sleep(1);
+		led_turn_OFF();
+	}
+
+	pthread_exit(NULL);
 }
 
 
