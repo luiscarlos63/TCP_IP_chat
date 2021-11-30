@@ -15,6 +15,7 @@
 #include <pthread.h>
 #include <ctype.h>
 #include <time.h>
+#include <unistd.h>
 
 void panic(char *msg);
 #define panic(m)	{perror(m); abort();}
