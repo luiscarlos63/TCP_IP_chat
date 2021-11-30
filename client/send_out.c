@@ -1,17 +1,3 @@
-// #include <stdio.h>
-
-
-// int main(int argc, char* argv[])
-// {
-
-
-//     printf("this will be the send\n");
-
-
-
-//     return 0;
-// }
-
 #include <stdio.h>
 #include <mqueue.h>   /* mq_* functions */
 #include <sys/stat.h>
