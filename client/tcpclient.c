@@ -104,8 +104,10 @@ int main(int count, char *args[])
 
 
 	pthread_create(&th_status_update, NULL, th_status_update_func, &time_last_send);
-
+	
+	//apenas se for par a rasp
 	system("insmod led.ko");
+	
 
 	/*---If connection successful, send the message and read results---*/
 	if ( connect(sd, (struct sockaddr*)&addr, sizeof(addr)) == 0)
@@ -161,12 +163,9 @@ void* th_receiver_func(void* arg)
 				send(sd, &pack, sizeof(pack), 0);	//manda
 			}	
 			else	
-			{		//caso nao seja um comando simplemte da print à mensagem
+			{	//caso nao seja um comando simplemte da print à mensagem
 				printf("%s\n", pack.buff);
-
-				#ifdef BOOST_ARCH_ARM		//apenas se for par a rasp
-					led_turn_ON();
-				#endif
+				led_turn_ON();
 			}
 		}
 		else	//o server desconectou-se
@@ -186,14 +185,11 @@ void* th_status_update_func(void* arg)
 
 	while (1)
 	{
-		time_aux.tv_sec = time(NULL) + 2;	//checks every 10 secons
+		time_aux.tv_sec = time(NULL) + 5;	//checks every 10 secons
 		time_aux.tv_nsec = 0;
 		
 		pthread_cond_timedwait(&condition_send, &mutex, &time_aux);
 		{
-			#ifdef BOOST_ARCH_ARM		//apenas se for par a rasp
-				led_turn_OFF();
-			#endif
 			if(time_aux.tv_sec >= time_last_send->tv_sec + 60) 
 			{
 					//posso por aqui outro condition varibel que para este processo ate efetivamente
