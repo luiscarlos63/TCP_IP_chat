@@ -11,4 +11,4 @@ tcpclient: tcpclient.o
 
 .PHONY: clean
 clean:
-	rm -rf tcpclient.elf *.o
+	rm -rf *.elf *.o
