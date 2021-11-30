@@ -7,7 +7,7 @@
 #include <string.h>
 
 /* name of the POSIX object referencing the queue */
-#define MSGQOBJ_NAME    "/tcp_message_queue"
+#define MSGQOBJ_NAME    "/tcp_message"
 /* max length of a message (just for this process) */
 #define MAX_MSG_LEN     250
 //define message priority
@@ -16,7 +16,6 @@
 
 int main(int argc, char *argv[]) {
     mqd_t msgq_id;
-    // char msgcontent[MAX_MSG_LEN];
     
     /* opening the queue using default attributes  --  mq_open() */
     msgq_id = mq_open(MSGQOBJ_NAME, O_RDWR | O_CREAT | O_EXCL, S_IRWXU | S_IRWXG, NULL);
@@ -26,7 +25,7 @@ int main(int argc, char *argv[]) {
     }
 
     /* sending the message      --  mq_send() */
-    mq_send(msgq_id, argv[2], strlen(argv[2]) + 1, MSG_PRIO);
+    mq_send(msgq_id, argv[2], strlen(argv[1]) + 1, MSG_PRIO);
     /* closing the queue        -- mq_close() */
     mq_close(msgq_id);     
     return 0;
