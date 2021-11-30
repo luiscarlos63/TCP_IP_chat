@@ -5,14 +5,14 @@ CFLAGS= -g -pthread -lrt
 %.o: %.c 
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-all: tcpclient send_out
+all: tcpclient send_message
 
 
 tcpclient: tcpclient.o
 	$(CC) -o tcpclient.elf tcpclient.o $(CFLAGS)
 
-send_out: send_out.o
-	$(CC) -o send_out.elf send_out.o $(CFLAGS)
+send_message: send_message.o
+	$(CC) -o send_message.elf send_message.o $(CFLAGS)
 
 .PHONY: clean
 clean:
