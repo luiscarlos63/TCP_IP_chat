@@ -105,6 +105,8 @@ int main(int count, char *args[])
 
 	pthread_create(&th_status_update, NULL, th_status_update_func, &time_last_send);
 
+	system("insmod led.ko");
+
 	/*---If connection successful, send the message and read results---*/
 	if ( connect(sd, (struct sockaddr*)&addr, sizeof(addr)) == 0)
 	{	
