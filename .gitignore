@@ -20,3 +20,4 @@ client/send_out.o
 client/send_message.elf
 client/send_message.o
 
+client/EMB_send_message.elf
