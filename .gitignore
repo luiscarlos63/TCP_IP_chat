@@ -15,3 +15,8 @@ client/tcpclient.o
 client/EMB_tcpcli.elf
 client/EMB_tcpclient.elf
 client/EMB_tcpclient.o
+client/send_out.elf
+client/send_out.o
+client/send_message.elf
+client/send_message.o
+
