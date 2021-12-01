@@ -19,7 +19,7 @@ int main(int argc, char *argv[]) {
     
     unsigned int m_prio = 1;
     /* opening the queue using default attributes  --  mq_open() */
-    msgq_id = mq_open(MSGQOBJ_NAME, O_RDWR | O_CREAT | O_EXCL, S_IRWXU | S_IRWXG, NULL);
+    msgq_id = mq_open(MSGQOBJ_NAME, O_RDWR | O_CREAT, S_IRWXU | S_IRWXG, NULL);
     if (msgq_id == (mqd_t)-1) {
         perror("In mq_open()");
         exit(1);

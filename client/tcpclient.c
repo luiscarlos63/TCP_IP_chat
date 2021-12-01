@@ -173,8 +173,7 @@ int main(int count, char *args[])
 				perror("In mq_receive()");
 				exit(1);
     		}
-			if(mq_recv_ret != -1)
-			{
+			
 				pack.type = MESSAGE;	//not needed here (never changes)
 				send(sd, &pack, sizeof(pack), 0);
 				cli_status = ONLINE;	
@@ -182,7 +181,6 @@ int main(int count, char *args[])
 				time_last_send.tv_sec = time(NULL);		//Regista o tempo em que mandou a ultima mensagem
 
 				pthread_cond_signal(&condition_send);	
-			}
 		}
 	}
 	else
