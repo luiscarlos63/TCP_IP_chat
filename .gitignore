@@ -1,3 +1,7 @@
+*.o
+*.elf
+
+
 server/tcpserver.elf
 server/.vscode/launch.json
 server/.vscode/tasks.json
