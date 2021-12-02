@@ -1,0 +1,54 @@
+
+The client should have a UI so that the User can choose between various actions.
+
+Ex:
+    > 1 - Creat chat
+
+        #Inside "Creat Chat":
+        
+            > name of the chat: 
+            bom_dia_guimaraes
+            > Created chat: bom_dia_guimaraes
+        #goes back to the first menu
+
+    > 2 - Go to chat
+
+        #Inside "Go to chat"
+
+            #displays all chat that the client is in
+            > 1 - bom_dia_guimaraes
+            > 2 - mau_dia_braga
+            >select a chat
+
+            #Inside the selected chat
+
+                > 1 - chat
+                    #Inside "chat"
+                    *Exchange messages
+                    *the command "!exit" will go back
+
+                > 2 - add client
+                    #Inside "add client"
+                    *list every client
+                    > ? - exit
+                    >select the client to be added
+
+                > 3 - get out of the chat
+                    #Inside "get out of the chat"
+                    *lists every chat that the client is in
+                    > ? - exit
+                    select the chat
+                    
+                > 4 - exit
+                    *goes back
+            
+
+    > 3 - Remove chat
+        #Inside "Remove chat"
+        *lists every chat that the client is the owner
+        > ? - exit
+        select the chat
+
+    > 4 - Exit
+    
+    >slect an option
