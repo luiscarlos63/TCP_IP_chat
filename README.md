@@ -14,5 +14,6 @@ It contains 3 programs:
   4. Exchange messages in the chat:
     - each client has a terminal to see the receives messages;
     - to send a message, the *send_message* is used.
-        ex: if you want so send the message **"what's up meus putos"**, you do: ***./send_message "what's up meus putos"***
+        ex: if you want so send the message **"what's up meus putos"**, you do: 
+            >./send_message "what's up meus putos"
   5. Repeat
