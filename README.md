@@ -9,7 +9,9 @@ It contains 3 programs:
 # How to use it
   1. Compile each source file.
   2. Run the **Server** passing it the **port** number as parameter
-  3. Run the **Client** passing it the **IP**, **port** and the **name** as parameters
+    > ./tcpserver.elf "port"
+
+  4. Run the **Client** passing it the **IP**, **port** and the **name** as parameters
   
   4. Exchange messages in the chat:
     - each client has a terminal to see the receives messages;
