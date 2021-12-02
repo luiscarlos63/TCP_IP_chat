@@ -12,5 +12,5 @@ It contains 2 programs:
   4. Exchange messages in the chat.
 
 
-# P.S.
-    There are a few versions for this programs. To find them go to **tags** and choose the one that it fits you
+# P.S
+There are a few versions for this programs. To find them go to **tags** and choose the one that it fits you
