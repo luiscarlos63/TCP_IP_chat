@@ -22,10 +22,10 @@ In client directory
 > ./tcpserver.elf "port"
 
   3. Run the **Client** passing it the **IP**, **port** and the **name** as parameters
-> ./tcpserver.elf "port"
+> ./tcpclient.elf "IP" "port" "name"
 
   4. Exchange messages in the chat:
-    - each client has a terminal to see the receives messages;
+    - each client has a terminal to see the received messages;
     - to send a message, the *send_message* is used.
         ex: if you want so send the message **"what's up meus putos"**, you do: 
 >./send_message "what's up meus putos"
