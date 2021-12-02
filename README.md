@@ -2,18 +2,23 @@
 
 This repository contains an TCP/IP server and client implementation
 It contains 3 programs:
+
     -Server
+
     -Client
+    
     -send_message
 
 # How to use it
   1. Compile each source file.
+
 In server directory 
 >make
 
 In client directory
 >make
-  3. Run the **Server** passing it the **port** number as parameter
+
+   2. Run the **Server** passing it the **port** number as parameter
 > ./tcpserver.elf "port"
 
   3. Run the **Client** passing it the **IP**, **port** and the **name** as parameters
