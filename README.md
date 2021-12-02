@@ -9,7 +9,7 @@ It contains 3 programs:
 # How to use it
   1. Compile each source file.
   2. Run the **Server** passing it the **port** number as parameter
-    > ./tcpserver.elf "port"
+> ./tcpserver.elf "port"
 
   4. Run the **Client** passing it the **IP**, **port** and the **name** as parameters
   
