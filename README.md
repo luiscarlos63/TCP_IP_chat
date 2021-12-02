@@ -10,3 +10,7 @@ It contains 2 programs:
   2. Run the **Server** passing it the **port** number as parameter
   3. Run the **Client** passing it the **IP**, **port** and the **name** as parameters
   4. Exchange messages in the chat.
+
+
+# P.S.
+    There are a few versions for this programs. To find them go to **tags** and choose the one that it fits you
