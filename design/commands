@@ -1,0 +1,9 @@
+the client and server will interact behind the curtins through a series of commands and requests
+
+the client will need the commands:
+
+    -!clients_status_request - this will request the server to send the updated info form each client
+    
+    -!add_chat  - Each time a client wants to create a chat it will request 
+
+    -
