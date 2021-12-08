@@ -1,0 +1,28 @@
+sequenceDiagram
+
+    Client1->>Client1:Display client chats
+
+    Client1->>+Client1:Selects chat
+    Note left of Client1: Inside selected chat
+    
+    alt chat 
+        loop
+            Client1->>+Server: send message
+            Server->>-Client2: broadcasts message
+        end
+    else add client
+        Client1->>+Server: request client list
+        Server-->>-Client1: send client list
+
+        Client1->>Client1: selects client
+
+        Client1->>+Server: request client addition
+        Server->>-Server: adds client to chat 
+    else get out of chat
+        Client1->>+Server: request chat leave
+        Server->>-Server: removes client from chat
+
+    else exit
+        Client1->>Client1: goes back
+    end
+
