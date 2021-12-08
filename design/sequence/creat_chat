@@ -1,0 +1,12 @@
+sequenceDiagram
+
+    Client-)+Server:creat chat
+    
+    alt successful
+        Server--)Client:chat created
+        Client->>Client:chat was created
+    else unseccsessful
+        Server--)-Client: chat not created
+        Client->>Client:chat was not created
+    end
+
