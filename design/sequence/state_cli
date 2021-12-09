@@ -1,0 +1,36 @@
+stateDiagram
+    [*] --> Initialization
+    Initialization --> Idle
+    Idle --> CreateChat
+    CreateChat --> Idle
+    Idle --> GotoChat
+    GotoChat --> OpenChat
+    GotoChat --> InviteClient
+    GotoChat --> LeaveChat
+    OpenChat --> GotoChat
+    InviteClient --> GotoChat
+    LeaveChat --> GotoChat
+    GotoChat --> Idle
+    Idle --> RemoveChat
+    RemoveChat --> Idle
+    state Initialization {
+    [*] --> AssignPort
+    AssignPort --> CreateSocket 
+    CreateSocket --> ConnectSocket
+    ConnectSocket -->[*]
+    }
+
+    state Idle {
+        [*] --> DisplayMenu
+        DisplayMenu-->[*]
+    }
+
+    state GotoChat {
+        [*] --> DisplayClientChats
+        DisplayClientChats --> [*]
+    }        
+    state RemoveChat {
+        [*] -->ListOwningChats
+        ListOwningChats --> [*]
+
+    }

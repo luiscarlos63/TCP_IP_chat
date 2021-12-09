@@ -2,8 +2,10 @@ the client and server will interact behind the curtins through a series of comma
 
 the client will need the commands:
 
-    -!clients_status_request - this will request the server to send the updated info form each client
+    - clients_status_request    - this will request the server to send the updated info form each client
     
-    -!add_chat  - Each time a client wants to create a chat it will request 
+    - creat_chat    - client requests the server to creat a new chat room
 
-    -
+    - add_to_chat   - Each time a client wants to create a chat it will request 
+
+    - 

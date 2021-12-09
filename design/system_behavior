@@ -22,14 +22,14 @@ Ex:
 
             #Inside the selected chat
 
-                > 1 - chat
+                > 1 - chat (mandar e recever mensagens)
                     #Inside "chat"
                     *Exchange messages
                     *the command "!exit" will go back
 
-                > 2 - add client
+                > 2 - add client    (invite client)
                     #Inside "add client"
-                    *list every client
+                    *list every client  (generic listing)
                     > ? - exit
                     >select the client to be added
 
